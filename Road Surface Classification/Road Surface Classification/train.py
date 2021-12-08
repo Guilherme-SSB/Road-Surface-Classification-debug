@@ -1,31 +1,34 @@
 import dataset
 import tensorflow as tf
+tf.compat.v1.disable_v2_behavior()
 import time
 from datetime import timedelta
 import math
 import random
 import numpy as np
 import os
+os.system('cls')
 
 #Adding Seed so that random initialization is consistent
 from numpy.random import seed
 seed(1)
-from tensorflow.random import set_seed 
-set_seed(2)
+import tensorflow                 
+tensorflow.random.set_seed(2)    
+print(tf.__version__)
 
 #os.system('spd-say -t male3 "I will try to learn this, my master."')
 
 batch_size = 32
 
 #Prepare input data
-classes = os.listdir('training_data')
+classes = os.listdir('C:/Users/guisa/Desktop/Problema Jean/Road Surface Classification/Road Surface Classification/training_data')
 num_classes = len(classes)
 
 # 20% of the data will automatically be used for validation
 validation_size = 0.2
 img_size = 128
 num_channels = 3
-train_path='training_data'
+train_path='C:/Users/guisa/Desktop/Problema Jean/Road Surface Classification/Road Surface Classification/training_data'
 
 # We shall load all the training and validation images and labels into memory using openCV and use that during training
 data = dataset.read_train_sets(train_path, img_size, classes, validation_size=validation_size)
@@ -36,14 +39,14 @@ print("Number of files in Training-set:\t\t{}".format(len(data.train.labels)))
 print("Number of files in Validation-set:\t{}".format(len(data.valid.labels)))
 
 
-session = tf.Session()
-x = tf.placeholder(tf.float32, shape=[None, img_size,img_size,num_channels], name='x')
+session = tf.compat.v1.Session()
+# x = tf.placeholder(tf.float32, shape=[None, img_size,img_size,num_channels], name='x')
+x = tf.compat.v1.placeholder(tf.float32, shape=[None, img_size,img_size,num_channels], name='x')
 
 ## labels
-y_true = tf.placeholder(tf.float32, shape=[None, num_classes], name='y_true')
+# y_true = tf.placeholder(tf.float32, shape=[None, num_classes], name='y_true')
+y_true = tf.compat.v1.placeholder(tf.float32, shape=[None, num_classes], name='y_true')
 y_true_cls = tf.argmax(y_true, dimension=1)
-
-
 
 ##Network graph params
 filter_size_conv1 = 3 
@@ -62,8 +65,6 @@ def create_weights(shape):
 
 def create_biases(size):
     return tf.Variable(tf.constant(0.05, shape=[size]))
-
-
 
 def create_convolutional_layer(input,
                num_input_channels, 
@@ -93,8 +94,6 @@ def create_convolutional_layer(input,
 
     return layer
 
-    
-
 def create_flatten_layer(layer):
     #We know that the shape of the layer will be [batch_size img_size img_size num_channels] 
     # But let's get it from the previous layer.
@@ -107,7 +106,6 @@ def create_flatten_layer(layer):
     layer = tf.reshape(layer, [-1, num_features])
 
     return layer
-
 
 def create_fc_layer(input,          
              num_inputs,    

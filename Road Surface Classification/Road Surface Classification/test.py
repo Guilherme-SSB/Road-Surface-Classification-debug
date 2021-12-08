@@ -1,11 +1,13 @@
 import cv2 as cv
 import numpy as np
 import tensorflow as tf
+tf.compat.v1.disable_v2_behavior()
 import argparse
 import sys
 import os.path
 import random
 import os
+os.system('cls')
 import glob
 import operator
 
@@ -14,7 +16,6 @@ num_channels=3
 images = []
 
 outputFile = sys.argv[2]
-
 # Opening frames
 cap = cv.VideoCapture(sys.argv[1])
 
@@ -26,12 +27,15 @@ height = int(round(cap.get(cv.CAP_PROP_FRAME_HEIGHT)))
 newHeight = int(round(height/2))
 
 # Restoring the model
-sess = tf.Session()
-saver = tf.train.import_meta_graph('roadsurface-model.meta')
+# sess = tf.Session()
+sess = tf.compat.v1.Session()
+# saver = tf.train.import_meta_graph('roadsurface-model.meta')
+saver = tf.compat.v1.train.import_meta_graph('roadsurface-model.meta')
 saver.restore(sess, tf.train.latest_checkpoint('./'))
 
 # Acessing the graph
-graph = tf.get_default_graph()
+# graph = tf.get_default_graph()
+graph = tf.compat.v1.get_default_graph()
 
 #
 y_pred = graph.get_tensor_by_name("y_pred:0")
