@@ -14,8 +14,8 @@ from numpy.random import seed
 seed(1)
 import tensorflow                 
 tensorflow.random.set_seed(2)    
-print(tf.config.list_physical_devices('GPU'))
-print(tf.__version__)
+# print(tf.config.list_physical_devices('GPU'))
+# print(tf.__version__)
 
 #os.system('spd-say -t male3 "I will try to learn this, my master."')
 
