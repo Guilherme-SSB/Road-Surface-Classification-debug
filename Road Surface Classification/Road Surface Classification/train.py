@@ -14,6 +14,7 @@ from numpy.random import seed
 seed(1)
 import tensorflow                 
 tensorflow.random.set_seed(2)    
+print(tf.config.list_physical_devices('GPU'))
 print(tf.__version__)
 
 #os.system('spd-say -t male3 "I will try to learn this, my master."')
@@ -46,7 +47,7 @@ x = tf.compat.v1.placeholder(tf.float32, shape=[None, img_size,img_size,num_chan
 ## labels
 # y_true = tf.placeholder(tf.float32, shape=[None, num_classes], name='y_true')
 y_true = tf.compat.v1.placeholder(tf.float32, shape=[None, num_classes], name='y_true')
-y_true_cls = tf.argmax(y_true, dimension=1)
+y_true_cls = tf.compat.v1.argmax(y_true, dimension=1)
 
 ##Network graph params
 filter_size_conv1 = 3 
@@ -61,7 +62,7 @@ num_filters_conv3 = 64
 fc_layer_size = 128
 
 def create_weights(shape):
-    return tf.Variable(tf.truncated_normal(shape, stddev=0.05))
+    return tf.Variable(tf.compat.v1.truncated_normal(shape, stddev=0.05))
 
 def create_biases(size):
     return tf.Variable(tf.constant(0.05, shape=[size]))
@@ -77,7 +78,7 @@ def create_convolutional_layer(input,
     biases = create_biases(num_filters)
 
     ## Creating the convolutional layer
-    layer = tf.nn.conv2d(input=input,
+    layer = tf.compat.v1.nn.conv2d(input=input,
                      filter=weights,
                      strides=[1, 1, 1, 1],
                      padding='SAME')
@@ -85,12 +86,12 @@ def create_convolutional_layer(input,
     layer += biases
 
     ## We shall be using max-pooling.  
-    layer = tf.nn.max_pool(value=layer,
+    layer = tf.compat.v1.nn.max_pool(value=layer,
                             ksize=[1, 2, 2, 1],
                             strides=[1, 2, 2, 1],
                             padding='SAME')
     ## Output of pooling is fed to Relu which is the activation function for us.
-    layer = tf.nn.relu(layer)
+    layer = tf.compat.v1.nn.relu(layer)
 
     return layer
 
@@ -117,9 +118,9 @@ def create_fc_layer(input,
     biases = create_biases(num_outputs)
 
     # Fully connected layer takes input x and produces wx+b.Since, these are matrices, we use matmul function in Tensorflow
-    layer = tf.matmul(input, weights) + biases
+    layer = tf.compat.v1.matmul(input, weights) + biases
     if use_relu:
-        layer = tf.nn.relu(layer)
+        layer = tf.compat.v1.nn.relu(layer)
 
     return layer
 
@@ -153,17 +154,20 @@ layer_fc2 = create_fc_layer(input=layer_fc1,
 
 y_pred = tf.nn.softmax(layer_fc2,name='y_pred')
 
-y_pred_cls = tf.argmax(y_pred, dimension=1)
-session.run(tf.global_variables_initializer())
-cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=layer_fc2,
-                                                    labels=y_true)
-cost = tf.reduce_mean(cross_entropy)
-optimizer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(cost)
-correct_prediction = tf.equal(y_pred_cls, y_true_cls)
-accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+# y_pred_cls = tf.compat.v1.argmax(y_pred, dimension=1)
+y_pred_cls = tf.math.argmax(input=y_pred, axis=1)
+session.run(tf.compat.v1.global_variables_initializer())
+# cross_entropy = tf.compat.v1.nn.softmax_cross_entropy_with_logits(logits=layer_fc2,
+                                                    # labels=y_true)
+cross_entropy = tf.compat.v1.nn.softmax_cross_entropy_with_logits_v2(logits=layer_fc2,
+                                                    labels=y_true)                                                    
+cost = tf.compat.v1.reduce_mean(cross_entropy)
+optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=1e-4).minimize(cost)
+correct_prediction = tf.compat.v1.equal(y_pred_cls, y_true_cls)
+accuracy = tf.compat.v1.reduce_mean(tf.compat.v1.cast(correct_prediction, tf.float32))
 
 
-session.run(tf.global_variables_initializer()) 
+session.run(tf.compat.v1.global_variables_initializer()) 
 
 
 def show_progress(epoch, feed_dict_train, feed_dict_validate, val_loss):
@@ -174,7 +178,7 @@ def show_progress(epoch, feed_dict_train, feed_dict_validate, val_loss):
 
 total_iterations = 0
 
-saver = tf.train.Saver()
+saver = tf.compat.v1.train.Saver()
 def train(num_iteration):
     global total_iterations
     
